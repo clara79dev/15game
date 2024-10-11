@@ -5,11 +5,13 @@ import './App.css';
 import Board from './components/Board';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [sequence, setSequence] = useState([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
+  ]);
 
   return (
     <>
-      <Board></Board>
+      <Board sequence={sequence}></Board>
     </>
   );
 }
