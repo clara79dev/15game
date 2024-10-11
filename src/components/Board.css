@@ -1,0 +1,15 @@
+.board {
+    border: 1px solid black;
+}
+
+/*
+.board .row {
+    
+}
+*/
+
+.board .cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid black;
+}

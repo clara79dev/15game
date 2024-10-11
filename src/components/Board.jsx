@@ -1,3 +1,5 @@
+import './Board.css';
+
 export default function Board({ sequence }) {
 
     const splittedSequences = sequence.reduce((acc, val, index) => {
@@ -11,15 +13,15 @@ export default function Board({ sequence }) {
 
     return (
         <div>
-            <table>
-                { splittedSequences.map((subSeq) => {
+            <table className="board">
+                { splittedSequences.map((subSeq, idx) => {
                     return (
-                        <tr>
-                            { subSeq.map((n => {
+                        <tr className="row" key={idx}>
+                            { subSeq.map((n, idx) => {
                                 return (
-                                    <td>{n}</td>
+                                    <td className="cell" key={idx}>{n > 0 && n}</td>
                                 )
-                            }))}
+                            })}
                         </tr>
                     );
                 })}
