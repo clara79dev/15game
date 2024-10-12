@@ -14,17 +14,19 @@ export default function Board({ sequence }) {
     return (
         <div>
             <table className="board">
-                { splittedSequences.map((subSeq, idx) => {
-                    return (
-                        <tr className="row" key={idx}>
-                            { subSeq.map((n, idx) => {
-                                return (
-                                    <td className="cell" key={idx}>{n > 0 && n}</td>
-                                )
-                            })}
-                        </tr>
-                    );
-                })}
+                <tbody>
+                    { splittedSequences.map((subSeq, idx) => {
+                        return (
+                            <tr className="row" key={idx}>
+                                { subSeq.map((n, idx) => {
+                                    return (
+                                        <td className="cell" key={idx}>{n > 0 && n}</td>
+                                    )
+                                })}
+                            </tr>
+                        );
+                    })}
+                </tbody>
             </table>
         </div>
     );
