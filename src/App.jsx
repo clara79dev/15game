@@ -5,23 +5,13 @@ import './App.css';
 import Board from './components/Board';
 import { coordsByIndex, findZeroIndex, getRandomInt, moveStepDown, moveStepLeft, moveStepRight, moveStepUp } from './utils/indexes';
 
-let intervalId;
+const SCRAMBLE_INTERVAL = 15000;
 
 function App() {
   const [sequence, setSequence] = useState([
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
   ]);
-
-  const scrambleSequence = () => {
-    const scrambledArray = sequence.slice();
-
-    for (let i = scrambledArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [scrambledArray[i], scrambledArray[j]] = [scrambledArray[j], scrambledArray[i]];
-    }
-
-    setSequence(scrambledArray);
-  };
+  const [intervalId, setIntervalId] = useState(null);
 
   const handleMoveStepUp = () => {
     const newSequence = moveStepUp(sequence);
@@ -54,16 +44,26 @@ function App() {
     handleMoveStepRight
   ];
 
+  const scrambleStep = () => {
+    const rowIdx = getRandomInt(0, 3);
+    const colIdx = getRandomInt(0, 3);
+    console.log(`rowIdx: ${rowIdx}, colIdx: ${colIdx}`);
+  
+    handleMultiStepMove(rowIdx, colIdx);
+  };
+
   const handleScrambleStart = () => {
-    intervalId = setInterval(() => {
-      const idx = getRandomInt(0, 3);
-      console.log(idx);
-      stepMoveHandlingFunctions[idx]();
-    }, 50);
+    console.log('avviato');
+    const newIntervalId = setInterval(() => {
+      scrambleStep();
+    }, SCRAMBLE_INTERVAL);
+
+    setIntervalId(newIntervalId);
   };
 
   const handleScrambleStop = () => {
     clearInterval(intervalId);
+    setIntervalId(null);
   };
 
   const stepMovingFunctionMap = {
@@ -75,66 +75,90 @@ function App() {
   };
 
   const calculateMovement = (cellRow, emptyCellRow, cellCol, emptyCellCol) => {
+    debugger;
+    let direction = 'NONE';
+    let discard = 0;
+
     if (cellRow === emptyCellRow) {
-      const discard = cellCol - emptyCellCol;
+      discard = cellCol - emptyCellCol;
       if (discard > 0) {
-        return ['RIGHT', discard];
+        direction = 'RIGHT';
       } else if (discard < 0) {
-        return ['LEFT', -discard];
+        direction = 'LEFT';
       } else
-        return ['NONE', 0];
+        direction = 'NONE';
     } else if (cellCol === emptyCellCol) {
-      const discard = cellRow - emptyCellRow;
+      discard = cellRow - emptyCellRow;
       if (discard > 0) {
-        return ['DOWN', discard];
-      } else if (cellRow - emptyCellRow < 0) {
-        return ['UP', -discard];
+        direction = 'DOWN';
+      } else if (discard < 0) {
+        direction = 'UP';
       } else
-        return ['NONE', 0];
-    } else
-      return ['NONE', 0];
+        direction = 'NONE';
+    } else {
+      direction = 'NONE';
+    }
+
+    console.log(`Direction: ${direction}, Discard: ${Math.abs(discard)} *`);
+    return [direction, Math.abs(discard)];
   };
 
-  const isSelectedCellInvalid = (cellRow, emptyCellRow, cellCol, emptyCellCol) => {
-    return cellRow !== emptyCellRow && cellCol !== emptyCellCol;
-  };
-
-  const handleCellClick = ([cellRow, cellCol, cellIdx]) => {
-    console.log(`handleCellClick => row: ${cellRow}, col: ${cellCol}, cellIdx: ${cellIdx}`);
+  const isSelectedCellValid = (cellRow, emptyCellRow, cellCol, emptyCellCol) => {
+    const sameRow = cellRow === emptyCellRow;
+    const sameCol = cellCol === emptyCellCol;
     
-    const emptyCellIdx = findZeroIndex(sequence);
+    return sameRow || sameCol;
+  };
+
+  const multiStepMove = (array, cellRow, cellCol) => {
+    const emptyCellIdx = findZeroIndex(array);
     const [emptyCellRow, emptyCellCol] = coordsByIndex(emptyCellIdx);
-    
-    if (isSelectedCellInvalid(cellRow, emptyCellRow, cellCol, emptyCellCol)) {
-      return;
+
+    if (!isSelectedCellValid(cellRow, emptyCellRow, cellCol, emptyCellCol)) {
+      return [array, 'NONE', 0];
     }
 
     const [direction, discard] = calculateMovement(cellRow, emptyCellRow, cellCol, emptyCellCol);
     const moveFunction = stepMovingFunctionMap[direction];
 
-    const newSequence = new Array(discard).fill(0).reduce((functions, currValue, currIdx) => {
+    const newArray = new Array(discard).fill(0).reduce((functions, currValue, currIdx) => {
       functions.push(moveFunction);
       return functions;
-    }, []).reduce((previousSequence, currentFunction, currentIdx)=>{
+    }, []).reduce((previousSequence, currentFunction, currentIdx) => {
       return currentFunction(previousSequence);
-    }, sequence);
-    
+    }, array);
+
+    return [newArray, direction, discard];
+  };
+
+  const handleMultiStepMove = (cellRow, cellCol) => {
+    const [newSequence, lastDirection, lastDiscard] = multiStepMove(sequence, cellRow, cellCol);
+    console.log(`Direction: ${lastDirection}, Discard: ${lastDiscard}`);
+    console.log(sequence);
+    console.log(newSequence);
     setSequence(newSequence);
+  };
+
+  const handleCellClick = ([cellRow, cellCol, cellIdx]) => {
+    console.log(`handleCellClick => row: ${cellRow}, col: ${cellCol}, cellIdx: ${cellIdx}`);
+
+    handleMultiStepMove(cellRow, cellCol);
   };
 
   return (
     <>
-      <button onClick={handleScrambleStart}>Start scrambling</button>
-      <button onClick={handleScrambleStop}>Stop scrambling</button>
+      <button onClick={handleScrambleStart} disabled={intervalId != null}>Start scrambling</button>
+      <button onClick={handleScrambleStop} disabled={intervalId == null}>Stop scrambling</button>
       <Board sequence={sequence} onCellClick={handleCellClick}></Board>
       <p>
-        <button onClick={handleMoveStepUp}>UP</button>
-        <button onClick={handleMoveStepDown}>DOWN</button>
-        <button onClick={handleMoveStepLeft}>LEFT</button>
-        <button onClick={handleMoveStepRight}>RIGHT</button>
+        <button onClick={handleMoveStepUp} disabled={intervalId != null}>UPP</button>
+        <button onClick={handleMoveStepDown} disabled={intervalId != null}>DOWN</button>
+        <button onClick={handleMoveStepLeft} disabled={intervalId != null}>LEFT</button>
+        <button onClick={handleMoveStepRight} disabled={intervalId != null}>RIGHT</button>
       </p>
     </>
   );
 }
 
 export default App;
+
