@@ -1,7 +1,6 @@
 export const findZeroIndex = (array) => array.findIndex(n => n === 0);
 
-export const coords = (idx) => {
-    debugger;
+export const coordsByIndex = (idx) => {
     const col = idx % 4;
 
     let row = 0;
@@ -16,72 +15,76 @@ export const coords = (idx) => {
     return [row, col];
 }
 
-export const moveUp = (array) => {
+export const indexByCoords = (row, col) => {
+    return row * 4 + col;
+};
+
+export const moveStepUp = (array) => {
     const movedArray = array.slice();
 
     const emptyCellIdx = findZeroIndex(movedArray);
-    const [row, col] = coords(emptyCellIdx);
+    const [row, col] = coordsByIndex(emptyCellIdx);
 
-    if (row > 0) {
-        const targetIdx = (row - 1) * 4 + col;
+    if (isNotFirstRow(row)) {
+        const targetIdx = indexByCoords(row - 1, col);
         const cellValue = movedArray[targetIdx];
         movedArray[targetIdx] = 0;
 
-        const currentIdx = row * 4 + col;
+        const currentIdx = indexByCoords(row, col);
         movedArray[currentIdx] = cellValue;
     }
 
     return movedArray;
 }
 
-export const moveDown = (array) => {
+export const moveStepDown = (array) => {
     const movedArray = array.slice();
 
     const emptyCellIdx = findZeroIndex(movedArray);
-    const [row, col] = coords(emptyCellIdx);
+    const [row, col] = coordsByIndex(emptyCellIdx);
 
-    if (row < 3) {
-        const targetIdx = (row + 1) * 4 + col;
+    if (isNotLastRow(row)) {
+        const targetIdx = indexByCoords(row + 1, col);
         const cellValue = movedArray[targetIdx];
         movedArray[targetIdx] = 0;
 
-        const currentIdx = row * 4 + col;
+        const currentIdx = indexByCoords(row, col);
         movedArray[currentIdx] = cellValue;
     }
 
     return movedArray;
 }
 
-export const moveLeft = (array) => {
+export const moveStepLeft = (array) => {
     const movedArray = array.slice();
 
     const emptyCellIdx = findZeroIndex(movedArray);
-    const [row, col] = coords(emptyCellIdx);
+    const [row, col] = coordsByIndex(emptyCellIdx);
 
-    if (col > 0) {
-        const targetIdx = row * 4 + (col - 1);
+    if (isNotFirstCol(col)) {
+        const targetIdx = indexByCoords(row, col - 1);
         const cellValue = movedArray[targetIdx];
         movedArray[targetIdx] = 0;
 
-        const currentIdx = row * 4 + col;
+        const currentIdx = indexByCoords(row, col);
         movedArray[currentIdx] = cellValue;
     }
 
     return movedArray;
 }
 
-export const moveRight = (array) => {
+export const moveStepRight = (array) => {
     const movedArray = array.slice();
 
     const emptyCellIdx = findZeroIndex(movedArray);
-    const [row, col] = coords(emptyCellIdx);
+    const [row, col] = coordsByIndex(emptyCellIdx);
 
-    if (col < 3) {
-        const targetIdx = row * 4 + (col + 1);
+    if (isNotLastCol(col)) {
+        const targetIdx = indexByCoords(row, col + 1);
         const cellValue = movedArray[targetIdx];
         movedArray[targetIdx] = 0;
 
-        const currentIdx = row * 4 + col;
+        const currentIdx = indexByCoords(row, col);
         movedArray[currentIdx] = cellValue;
     }
 
@@ -89,3 +92,20 @@ export const moveRight = (array) => {
 }
 
 export const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+function isNotLastCol(col) {
+    return col < 3;
+}
+
+function isNotFirstCol(col) {
+    return col > 0;
+}
+
+function isNotLastRow(row) {
+    return row < 3;
+}
+
+function isNotFirstRow(row) {
+    return row > 0;
+}
+
