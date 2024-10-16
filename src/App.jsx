@@ -5,7 +5,7 @@ import './App.css';
 import Board from './components/Board';
 import { coordsByIndex, findZeroIndex, getRandomInt, moveStepDown, moveStepLeft, moveStepRight, moveStepUp } from './utils/indexes';
 
-const SCRAMBLE_INTERVAL = 500;
+const SCRAMBLE_INTERVAL = 100;
 
 function App() {
   const [sequence, setSequence] = useState([
@@ -14,11 +14,9 @@ function App() {
   const [timeoutId, setTimeoutId] = useState(null);
   const [trigger, setTrigger] = useState(0);
   useEffect(() => {
-    debugger;
     if(trigger != 0) {
       console.log(`eff ${sequence}`);
       let timeoutId = setTimeout(() => {
-        debugger;
         const rowIdx = getRandomInt(0, 3);
         const colIdx = getRandomInt(0, 3);
         console.log(`rowIdx: ${rowIdx}, colIdx: ${colIdx}`);
@@ -27,8 +25,8 @@ function App() {
         console.log(newSequence);
         setSequence(newSequence);
         setTrigger(Math.random());
-        setTimeoutId(timeoutId);
       }, SCRAMBLE_INTERVAL);
+      setTimeoutId(timeoutId);
     }
   }, [trigger]);
 
@@ -85,6 +83,7 @@ function App() {
   const handleScrambleStop = () => {
     // clearInterval(intervalId);
     // setIntervalId(null);
+    clearTimeout(timeoutId);
     setTrigger(0);
     setTimeoutId(null);
   };
@@ -174,10 +173,10 @@ function App() {
       <button onClick={handleScrambleStop} disabled={trigger == 0}>Stop scrambling</button>
       <Board sequence={sequence} onCellClick={handleCellClick}></Board>
       <p>
-        <button onClick={handleMoveStepUp} disabled={intervalId != null}>UPP</button>
-        <button onClick={handleMoveStepDown} disabled={intervalId != null}>DOWN</button>
-        <button onClick={handleMoveStepLeft} disabled={intervalId != null}>LEFT</button>
-        <button onClick={handleMoveStepRight} disabled={intervalId != null}>RIGHT</button>
+        <button onClick={handleMoveStepUp} disabled={trigger != 0}>UPP</button>
+        <button onClick={handleMoveStepDown} disabled={trigger != 0}>DOWN</button>
+        <button onClick={handleMoveStepLeft} disabled={trigger != 0}>LEFT</button>
+        <button onClick={handleMoveStepRight} disabled={trigger != 0}>RIGHT</button>
       </p>
     </>
   );
