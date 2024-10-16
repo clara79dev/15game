@@ -27,7 +27,7 @@ export default function Board({ sequence, onCellClick }) {
                                 { subSeq.map((n, colIdx) => {
                                     return (
                                         <td 
-                                            className="cell" 
+                                            className={n > 0 ? "cell" : "cell-empty"}
                                             key={colIdx} 
                                             data-celldata={[rowIdx, colIdx, indexByCoords(rowIdx, colIdx)]} 
                                             onClick={handleCellClick}>{n > 0 && n}

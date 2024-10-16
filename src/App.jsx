@@ -1,17 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
 import Board from './components/Board';
 import { coordsByIndex, findZeroIndex, getRandomInt, moveStepDown, moveStepLeft, moveStepRight, moveStepUp } from './utils/indexes';
 
-const SCRAMBLE_INTERVAL = 15000;
+const SCRAMBLE_INTERVAL = 500;
 
 function App() {
   const [sequence, setSequence] = useState([
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
   ]);
-  const [intervalId, setIntervalId] = useState(null);
+  const [timeoutId, setTimeoutId] = useState(null);
+  const [trigger, setTrigger] = useState(0);
+  useEffect(() => {
+    debugger;
+    if(trigger != 0) {
+      console.log(`eff ${sequence}`);
+      let timeoutId = setTimeout(() => {
+        debugger;
+        const rowIdx = getRandomInt(0, 3);
+        const colIdx = getRandomInt(0, 3);
+        console.log(`rowIdx: ${rowIdx}, colIdx: ${colIdx}`);
+        const [newSequence, lastDirection, lastDiscard] = multiStepMove(sequence, rowIdx, colIdx);
+        console.log(`Direction: ${lastDirection}, Discard: ${lastDiscard}`);
+        console.log(newSequence);
+        setSequence(newSequence);
+        setTrigger(Math.random());
+        setTimeoutId(timeoutId);
+      }, SCRAMBLE_INTERVAL);
+    }
+  }, [trigger]);
 
   const handleMoveStepUp = () => {
     const newSequence = moveStepUp(sequence);
@@ -53,17 +72,21 @@ function App() {
   };
 
   const handleScrambleStart = () => {
-    console.log('avviato');
-    const newIntervalId = setInterval(() => {
-      scrambleStep();
-    }, SCRAMBLE_INTERVAL);
+    // console.log('avviato');
+    // const newIntervalId = setInterval(() => {
+    //   scrambleStep();
+    // }, SCRAMBLE_INTERVAL);
 
-    setIntervalId(newIntervalId);
+    // setIntervalId(newIntervalId);
+    const newTrigger = Math.random();
+    setTrigger(newTrigger);
   };
 
   const handleScrambleStop = () => {
-    clearInterval(intervalId);
-    setIntervalId(null);
+    // clearInterval(intervalId);
+    // setIntervalId(null);
+    setTrigger(0);
+    setTimeoutId(null);
   };
 
   const stepMovingFunctionMap = {
@@ -75,7 +98,6 @@ function App() {
   };
 
   const calculateMovement = (cellRow, emptyCellRow, cellCol, emptyCellCol) => {
-    debugger;
     let direction = 'NONE';
     let discard = 0;
 
@@ -132,9 +154,10 @@ function App() {
   };
 
   const handleMultiStepMove = (cellRow, cellCol) => {
+    console.log(sequence);
     const [newSequence, lastDirection, lastDiscard] = multiStepMove(sequence, cellRow, cellCol);
     console.log(`Direction: ${lastDirection}, Discard: ${lastDiscard}`);
-    console.log(sequence);
+
     console.log(newSequence);
     setSequence(newSequence);
   };
@@ -147,8 +170,8 @@ function App() {
 
   return (
     <>
-      <button onClick={handleScrambleStart} disabled={intervalId != null}>Start scrambling</button>
-      <button onClick={handleScrambleStop} disabled={intervalId == null}>Stop scrambling</button>
+      <button onClick={handleScrambleStart} disabled={trigger != 0}>Start scrambling</button>
+      <button onClick={handleScrambleStop} disabled={trigger == 0}>Stop scrambling</button>
       <Board sequence={sequence} onCellClick={handleCellClick}></Board>
       <p>
         <button onClick={handleMoveStepUp} disabled={intervalId != null}>UPP</button>
