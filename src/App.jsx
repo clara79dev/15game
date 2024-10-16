@@ -3,15 +3,19 @@ import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
 import Board from './components/Board';
-import { coordsByIndex, findZeroIndex, getRandomInt, moveStepDown, moveStepLeft, moveStepRight, moveStepUp } from './utils/indexes';
+import Winner from './components/Winner';
+import { coordsByIndex, findZeroIndex, getRandomInt, moveStepDown, moveStepLeft, moveStepRight, moveStepUp, arraysEqual } from './utils/indexes';
 
 const SCRAMBLE_INTERVAL = 50;
 
+const INITIAL_CONFIGURATION = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
+];
+
 function App() {
-  const [sequence, setSequence] = useState([
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
-  ]);
+  const [sequence, setSequence] = useState(INITIAL_CONFIGURATION);
   const [timerHandle, setTimerHandle] = useState(null);
+  const [winner, setWinner] = useState(false);
 
   const handleMoveStepUp = () => {
     const newSequence = moveStepUp(sequence);
@@ -142,6 +146,12 @@ function App() {
 
     console.log(newSequence);
     setSequence(newSequence);
+
+    if (!arraysEqual(sequence, newSequence) && arraysEqual(newSequence, INITIAL_CONFIGURATION)) {
+      setWinner(true);
+    } else {
+      setWinner(false);
+    }
   };
 
   const handleCellClick = ([cellRow, cellCol, cellIdx]) => {
@@ -150,17 +160,33 @@ function App() {
     handleMultiStepMove(cellRow, cellCol);
   };
 
+  const handleRestart = () => {
+    setWinner(false);
+    setSequence(INITIAL_CONFIGURATION);
+  };
+
+  const winnerOrScrambling = () => timerHandle != null || winner;
+
   return (
     <>
-      <button onClick={handleScrambleStart} disabled={timerHandle != null}>Start scrambling</button>
-      <button onClick={handleScrambleStop} disabled={timerHandle == null}>Stop scrambling</button>
-      <Board sequence={sequence} onCellClick={handleCellClick}></Board>
-      <p>
-        <button onClick={handleMoveStepUp} disabled={timerHandle != null}>UP</button>
-        <button onClick={handleMoveStepDown} disabled={timerHandle != null}>DOWN</button>
-        <button onClick={handleMoveStepLeft} disabled={timerHandle != null}>LEFT</button>
-        <button onClick={handleMoveStepRight} disabled={timerHandle != null}>RIGHT</button>
-      </p>
+      <h1>15 game</h1>
+      {!winner && (
+        <p>
+          {timerHandle == null && <button className='scramble' onClick={handleScrambleStart} disabled={winnerOrScrambling()}>Start scrambling</button>}
+          {timerHandle != null && <button className='scramble' onClick={handleScrambleStop} disabled={timerHandle == null}>Stop scrambling</button>}
+          <button className='restart' onClick={handleRestart} disabled={timerHandle != null}>Restart</button>
+        </p>
+      )}
+      {!winner && <Board sequence={sequence} onCellClick={handleCellClick}></Board>}
+      { winner && <Winner onRestart={handleRestart}></Winner>}
+      {!winner && (
+        <p>
+          <button className='move' onClick={handleMoveStepUp} disabled={winnerOrScrambling()}>UP</button>
+          <button className='move' onClick={handleMoveStepDown} disabled={winnerOrScrambling()}>DOWN</button>
+          <button className='move' onClick={handleMoveStepLeft} disabled={winnerOrScrambling()}>LEFT</button>
+          <button className='move' onClick={handleMoveStepRight} disabled={winnerOrScrambling()}>RIGHT</button>
+        </p>
+      )}
     </>
   );
 }
