@@ -5,30 +5,13 @@ import './App.css';
 import Board from './components/Board';
 import { coordsByIndex, findZeroIndex, getRandomInt, moveStepDown, moveStepLeft, moveStepRight, moveStepUp } from './utils/indexes';
 
-const SCRAMBLE_INTERVAL = 100;
+const SCRAMBLE_INTERVAL = 50;
 
 function App() {
   const [sequence, setSequence] = useState([
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
   ]);
-  const [timeoutId, setTimeoutId] = useState(null);
-  const [trigger, setTrigger] = useState(0);
-  useEffect(() => {
-    if(trigger != 0) {
-      console.log(`eff ${sequence}`);
-      let timeoutId = setTimeout(() => {
-        const rowIdx = getRandomInt(0, 3);
-        const colIdx = getRandomInt(0, 3);
-        console.log(`rowIdx: ${rowIdx}, colIdx: ${colIdx}`);
-        const [newSequence, lastDirection, lastDiscard] = multiStepMove(sequence, rowIdx, colIdx);
-        console.log(`Direction: ${lastDirection}, Discard: ${lastDiscard}`);
-        console.log(newSequence);
-        setSequence(newSequence);
-        setTrigger(Math.random());
-      }, SCRAMBLE_INTERVAL);
-      setTimeoutId(timeoutId);
-    }
-  }, [trigger]);
+  const [timerHandle, setTimerHandle] = useState(null);
 
   const handleMoveStepUp = () => {
     const newSequence = moveStepUp(sequence);
@@ -62,30 +45,30 @@ function App() {
   ];
 
   const scrambleStep = () => {
-    const rowIdx = getRandomInt(0, 3);
-    const colIdx = getRandomInt(0, 3);
-    console.log(`rowIdx: ${rowIdx}, colIdx: ${colIdx}`);
-  
-    handleMultiStepMove(rowIdx, colIdx);
+    setSequence(currentSequence => {
+      const rowIdx = getRandomInt(0, 3);
+      const colIdx = getRandomInt(0, 3);
+      console.log(`rowIdx: ${rowIdx}, colIdx: ${colIdx}`);
+      
+      console.log(currentSequence);
+      const [newSequence, lastDirection, lastDiscard] = multiStepMove(currentSequence, rowIdx, colIdx);
+      console.log(`Direction: ${lastDirection}, Discard: ${lastDiscard}`);
+      console.log(newSequence);
+      
+      return newSequence;
+    });
   };
 
   const handleScrambleStart = () => {
-    // console.log('avviato');
-    // const newIntervalId = setInterval(() => {
-    //   scrambleStep();
-    // }, SCRAMBLE_INTERVAL);
-
-    // setIntervalId(newIntervalId);
-    const newTrigger = Math.random();
-    setTrigger(newTrigger);
+    const timerHandle = setInterval(() => {
+      scrambleStep();
+    }, SCRAMBLE_INTERVAL);
+    setTimerHandle(timerHandle);
   };
 
   const handleScrambleStop = () => {
-    // clearInterval(intervalId);
-    // setIntervalId(null);
-    clearTimeout(timeoutId);
-    setTrigger(0);
-    setTimeoutId(null);
+    clearTimeout(timerHandle);
+    setTimerHandle(null);
   };
 
   const stepMovingFunctionMap = {
@@ -120,7 +103,7 @@ function App() {
       direction = 'NONE';
     }
 
-    console.log(`Direction: ${direction}, Discard: ${Math.abs(discard)} *`);
+    console.log(`Target direction: ${direction}, Target discard: ${Math.abs(discard)}`);
     return [direction, Math.abs(discard)];
   };
 
@@ -169,14 +152,14 @@ function App() {
 
   return (
     <>
-      <button onClick={handleScrambleStart} disabled={trigger != 0}>Start scrambling</button>
-      <button onClick={handleScrambleStop} disabled={trigger == 0}>Stop scrambling</button>
+      <button onClick={handleScrambleStart} disabled={timerHandle != null}>Start scrambling</button>
+      <button onClick={handleScrambleStop} disabled={timerHandle == null}>Stop scrambling</button>
       <Board sequence={sequence} onCellClick={handleCellClick}></Board>
       <p>
-        <button onClick={handleMoveStepUp} disabled={trigger != 0}>UPP</button>
-        <button onClick={handleMoveStepDown} disabled={trigger != 0}>DOWN</button>
-        <button onClick={handleMoveStepLeft} disabled={trigger != 0}>LEFT</button>
-        <button onClick={handleMoveStepRight} disabled={trigger != 0}>RIGHT</button>
+        <button onClick={handleMoveStepUp} disabled={timerHandle != null}>UP</button>
+        <button onClick={handleMoveStepDown} disabled={timerHandle != null}>DOWN</button>
+        <button onClick={handleMoveStepLeft} disabled={timerHandle != null}>LEFT</button>
+        <button onClick={handleMoveStepRight} disabled={timerHandle != null}>RIGHT</button>
       </p>
     </>
   );
