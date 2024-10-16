@@ -6,3 +6,19 @@
 .button {
     background-color: yellowgreen;
 }
+
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.funnyimg {
+    width: 200px;
+    height: 133px;
+    padding: 10px;
+}
+
+.funnytext {
+    padding: 10px;
+}
