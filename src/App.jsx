@@ -20,21 +20,45 @@ function App() {
   const handleMoveStepUp = () => {
     const newSequence = moveStepUp(sequence);
     setSequence(newSequence);
+
+    if (!arraysEqual(sequence, newSequence) && arraysEqual(newSequence, INITIAL_CONFIGURATION)) {
+      setWinner(true);
+    } else {
+      setWinner(false);
+    }
   };
 
   const handleMoveStepDown = () => {
     const newSequence = moveStepDown(sequence);
     setSequence(newSequence);
+
+    if (!arraysEqual(sequence, newSequence) && arraysEqual(newSequence, INITIAL_CONFIGURATION)) {
+      setWinner(true);
+    } else {
+      setWinner(false);
+    }
   };
 
   const handleMoveStepLeft = () => {
     const newSequence = moveStepLeft(sequence);
     setSequence(newSequence);
+
+    if (!arraysEqual(sequence, newSequence) && arraysEqual(newSequence, INITIAL_CONFIGURATION)) {
+      setWinner(true);
+    } else {
+      setWinner(false);
+    }
   };
 
   const handleMoveStepRight = () => {
     const newSequence = moveStepRight(sequence);
     setSequence(newSequence);
+
+    if (!arraysEqual(sequence, newSequence) && arraysEqual(newSequence, INITIAL_CONFIGURATION)) {
+      setWinner(true);
+    } else {
+      setWinner(false);
+    }
   };
 
   const moveNoStep = () => {
